@@ -102,7 +102,9 @@ http://localhost:5000/api-docs
 - `POST /api/auth/logout` → Logout
 - `GET /api/auth/profile` → Get current user profile
 - `PUT /api/auth/profile` → Update current user profile
-- `DELETE /api/auth/profile` → Delete current user profile
+- `DELETE /api/auth/profile` → Delete current user 
+- `change-password /api/auth/change-password` → change password current user
+profile
 
 ### Users (Admin only)
 - `POST /api/users` → Create new user
@@ -134,4 +136,5 @@ http://localhost:5000/api-docs
 ## Frontend Development
 
 You can build a React or Next.js frontend using this API and implement JWT-based authentication.
+
 
