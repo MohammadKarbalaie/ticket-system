@@ -3,7 +3,7 @@ const dotenv = require("dotenv");
 const cookieParser = require("cookie-parser"); 
 const connectDB = require("./config/db");
 const { swaggerUi, swaggerSpec } = require("./docs/swagger");
-
+const cors = require("cors");
 const categoryRoutes = require("./routes/category.routes");
 const authRoutes = require("./routes/auth.routes");
 const userRoutes = require("./routes/user.routes");
@@ -15,6 +15,12 @@ connectDB();
 
 const app = express();
 app.use(express.json());
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    credentials: true, 
+  })
+);
 app.use(cookieParser()); 
 
 // Routes

@@ -207,3 +207,53 @@ exports.logout = (req, res) => {
   res.clearCookie("refreshToken");
   res.json({ message: "خروج موفقیت‌آمیز بود" });
 };
+
+//------------------تغییر پسورد ---------------------
+
+exports.changePassword = async (req, res, mode) => {
+  try {
+    let userId;
+    let { oldPassword, newPassword } = req.body;
+
+    if (mode === "self") {
+      // تغییر پسورد توسط خود کاربر
+      userId = req.user.id;
+      if (!oldPassword || !newPassword) {
+        return res.status(400).json({ message: "پسورد قبلی و جدید الزامی است" });
+      }
+
+      const user = await User.findById(userId);
+      if (!user) return res.status(404).json({ message: "کاربر یافت نشد" });
+
+      const isMatch = await bcrypt.compare(oldPassword, user.password);
+      if (!isMatch) {
+        return res.status(400).json({ message: "پسورد قبلی اشتباه است" });
+      }
+
+      user.password = await bcrypt.hash(newPassword, 10);
+      await user.save();
+
+      return res.json({ message: "پسورد شما با موفقیت تغییر کرد" });
+    }
+
+    if (mode === "admin") {
+      // ریست پسورد توسط ادمین
+      userId = req.params.id;
+      if (!newPassword) {
+        return res.status(400).json({ message: "پسورد جدید الزامی است" });
+      }
+
+      const user = await User.findById(userId);
+      if (!user) return res.status(404).json({ message: "کاربر یافت نشد" });
+
+      user.password = await bcrypt.hash(newPassword, 10);
+      await user.save();
+
+      return res.json({ message: "پسورد کاربر با موفقیت ریست شد" });
+    }
+
+    res.status(400).json({ message: "حالت نامعتبر است" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};

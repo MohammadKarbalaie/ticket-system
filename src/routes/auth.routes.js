@@ -120,6 +120,32 @@ router.put("/profile", authMiddleware, authController.updateUser);
 
 /**
  * @swagger
+ * /api/auth/change-password:
+ *   put:
+ *     summary: تغییر پسورد کاربر جاری
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [oldPassword, newPassword]
+ *             properties:
+ *               oldPassword: { type: string }
+ *               newPassword: { type: string }
+ *     responses:
+ *       200: { description: پسورد با موفقیت تغییر کرد }
+ *       400: { description: پسورد قبلی اشتباه است }
+ */
+router.put("/change-password", authMiddleware, (req, res) =>
+  authController.changePassword(req, res, "self")
+);
+
+/**
+ * @swagger
  * /api/auth/profile:
  *   delete:
  *     summary: حذف اکانت کاربر جاری

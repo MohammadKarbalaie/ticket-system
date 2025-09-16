@@ -126,4 +126,34 @@ router.put("/:id", authMiddleware, adminOnly, authController.updateUserByAdmin |
  */
 router.delete("/:id", authMiddleware, adminOnly, authController.deleteUserByAdmin || ((req,res)=>res.status(501).json({message:"deleteUserByAdmin not implemented"})));
 
+/**
+ * @swagger
+ * /api/users/{id}/reset-password:
+ *   put:
+ *     summary: تغییر پسورد یک کاربر توسط ادمین
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [newPassword]
+ *             properties:
+ *               newPassword: { type: string }
+ *     responses:
+ *       200: { description: پسورد کاربر ریست شد }
+ */
+router.put("/:id/reset-password", authMiddleware, adminOnly, (req, res) =>
+  authController.changePassword(req, res, "admin")
+);
+
+
 module.exports = router;
