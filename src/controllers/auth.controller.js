@@ -189,7 +189,8 @@ exports.refreshToken = async (req, res) => {
       return res.status(401).json({ message: "رفرش توکن یافت نشد" });
 
     jwt.verify(refreshToken, JWT_REFRESH_SECRET, async (err, decoded) => {
-      if (err) return res.status(403).json({ message: "رفرش توکن نامعتبر است" });
+      if (err)
+        return res.status(403).json({ message: "رفرش توکن نامعتبر است" });
 
       const user = await User.findById(decoded.id);
       if (!user) return res.status(404).json({ message: "کاربر یافت نشد" });
@@ -219,7 +220,9 @@ exports.changePassword = async (req, res, mode) => {
       // تغییر پسورد توسط خود کاربر
       userId = req.user.id;
       if (!oldPassword || !newPassword) {
-        return res.status(400).json({ message: "پسورد قبلی و جدید الزامی است" });
+        return res
+          .status(400)
+          .json({ message: "پسورد قبلی و جدید الزامی است" });
       }
 
       const user = await User.findById(userId);
@@ -257,3 +260,17 @@ exports.changePassword = async (req, res, mode) => {
     res.status(500).json({ message: err.message });
   }
 };
+
+//----------------------گرفتن همه کاربران------------------------
+
+exports.getAllUsers = async (req, res) => {
+    try {
+    const user = await User.find(req.user).select("-password");
+    if (!user) return res.status(404).json({ message: "کاربر یافت نشد" });
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+

@@ -53,7 +53,7 @@ router.post("/", authMiddleware, adminOnly, authController.createUserByAdmin || 
  *     responses:
  *       200: { description: لیست کاربران }
  */
-router.get("/", authMiddleware, adminOnly, authController.getAllUsers || ((req,res)=>res.status(501).json({message:"getAllUsers not implemented"})));
+router.get("/", authController.getAllUsers || ((req,res)=>res.status(501).json({message:"getAllUsers not implemented"})));
 
 /**
  * @swagger
