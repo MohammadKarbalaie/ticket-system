@@ -89,18 +89,26 @@ router.get("/:id", authMiddleware, getTicketById);
  *             required:
  *               - title
  *               - category
+ *               - assignedDepartment
  *             properties:
  *               title:
  *                 type: string
+ *                 example: "Test Ticket"
  *               category:
  *                 type: string
+ *                 description: آیدی دسته‌بندی (ObjectId از Category)
+ *                 example: "68c6bd7cf675d1705e90d900"
  *               assignedDepartment:
  *                 type: string
+ *                 description: نام دپارتمان (متنی ساده، نه ObjectId)
+ *                 example: "IT"
  *               description:
  *                 type: string
+ *                 example: "This is a test ticket"
  *               priority:
  *                 type: string
  *                 enum: [low, medium, high, urgent]
+ *                 example: "low"
  *     responses:
  *       201:
  *         description: تیکت ایجاد شد
@@ -139,6 +147,7 @@ router.post("/", authMiddleware, createTicket);
  *                 enum: [low, medium, high, urgent]
  *               assignedDepartment:
  *                 type: string
+ *                 description: نام دپارتمان (متنی ساده)
  *               description:
  *                 type: string
  *     responses:

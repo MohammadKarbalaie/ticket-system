@@ -16,7 +16,7 @@ const TicketSchema = new mongoose.Schema({
     enum: ["low", "medium", "high", "urgent"],
     default: "medium",
   },
-  assignedDepartment: { type: String, required: true }, // کاربر باید انتخاب کند
+  assignedDepartment: { type: String, required: true },
   description: { type: String },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
@@ -26,7 +26,6 @@ TicketSchema.pre("save", function (next) {
   this.updatedAt = new Date();
   next();
 });
-
 
 TicketSchema.pre("validate", async function (next) {
   if (!this.ticketNumber) {

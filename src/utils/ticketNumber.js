@@ -1,6 +1,6 @@
-const Ticket = require("../models/ticket");
-
 async function generateTicketNumber() {
+  const Ticket = require("../models/ticket");
+
   const last = await Ticket.findOne({}).sort({ createdAt: -1 }).exec();
   if (!last) return "TKT0001";
 
