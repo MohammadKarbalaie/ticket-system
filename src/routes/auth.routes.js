@@ -22,7 +22,7 @@ const { authMiddleware } = require("../middlewares/auth.middleware");
  *         application/json:
  *           schema:
  *             type: object
- *             required: [fname, lname, email, username, password]
+ *             required: [fname, lname, email, username, department, password]
  *             properties:
  *               fname: { type: string }
  *               lname: { type: string }
@@ -33,6 +33,7 @@ const { authMiddleware } = require("../middlewares/auth.middleware");
  *               password: { type: string }
  *     responses:
  *       201: { description: ثبت‌نام موفقیت‌آمیز }
+ *       400: { description: ایمیل یا نام کاربری تکراری است }
  */
 router.post("/register", authController.register);
 
@@ -77,7 +78,7 @@ router.post("/refresh", authController.refreshToken);
  *     summary: خروج کاربر و پاک کردن رفرش توکن
  *     tags: [Auth]
  *     responses:
- *       200: { description: خروج موفقیت‌آمیز }
+ *       200: { description: خروج موفقیت‌آمیز بود }
  */
 router.post("/logout", authController.logout);
 
@@ -138,11 +139,8 @@ router.put("/profile", authMiddleware, authController.updateUser);
  *               newPassword: { type: string }
  *     responses:
  *       200: { description: پسورد با موفقیت تغییر کرد }
- *       400: { description: پسورد قبلی اشتباه است }
  */
-router.put("/change-password", authMiddleware, (req, res) =>
-  authController.changePassword(req, res, "self")
-);
+router.put("/change-password", authMiddleware, (req, res) => authController.changePassword(req, res, "self"));
 
 /**
  * @swagger

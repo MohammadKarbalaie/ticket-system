@@ -30,23 +30,16 @@ function generateRefreshToken(user) {
 // ---------------- ثبت‌نام ----------------
 exports.register = async (req, res) => {
   try {
-    const { fname, lname, email, username, department, phone, password } =
-      req.body;
+    const { fname, lname, email, username, department, phone, password } = req.body;
 
     if (!email || !username || !password) {
-      return res
-        .status(400)
-        .json({ message: "ایمیل، نام کاربری و پسورد الزامی است" });
+      return res.status(400).json({ message: "ایمیل، نام کاربری و پسورد الزامی است" });
     }
 
     const existingUser = await User.findOne({
       $or: [{ email: email.toLowerCase().trim() }, { username }],
     });
-    if (existingUser) {
-      return res
-        .status(400)
-        .json({ message: "ایمیل یا نام کاربری قبلاً ثبت شده است" });
-    }
+    if (existingUser) return res.status(400).json({ message: "ایمیل یا نام کاربری قبلاً ثبت شده است" });
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -58,11 +51,9 @@ exports.register = async (req, res) => {
       department,
       phone,
       password: hashedPassword,
-      role: "user",
-      status: "active",
+      role: "کاربر",
+      status: "فعال",
     });
-
-    if (req.file) user.avatar = req.file.filename;
 
     await user.save();
 
@@ -70,6 +61,8 @@ exports.register = async (req, res) => {
       message: "ثبت‌نام موفقیت‌آمیز بود",
       user: {
         id: user._id,
+        fname: user.fname,
+        lname: user.lname,
         email: user.email,
         username: user.username,
         role: user.role,
@@ -92,10 +85,8 @@ exports.login = async (req, res) => {
     const user = await User.findOne({ email: email.toLowerCase().trim() });
     if (!user) return res.status(400).json({ message: "کاربر یافت نشد" });
 
-    if (user.status !== "active") {
-      return res
-        .status(403)
-        .json({ message: "اکانت شما فعال نیست، لطفاً با مدیر تماس بگیرید" });
+    if (user.status !== "فعال") {
+      return res.status(403).json({ message: "اکانت شما فعال نیست، لطفاً با مدیر تماس بگیرید" });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
@@ -104,7 +95,6 @@ exports.login = async (req, res) => {
     const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user);
 
-    // ذخیره refreshToken در کوکی HttpOnly
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -123,6 +113,7 @@ exports.login = async (req, res) => {
         username: user.username,
         role: user.role,
         status: user.status,
+        department: user.department,
       },
     });
   } catch (err) {
@@ -133,7 +124,7 @@ exports.login = async (req, res) => {
 // ---------------- گرفتن پروفایل ----------------
 exports.profile = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select("-password");
+    const user = await User.findById(req.user.id).select("-password").populate("department", "name description");
     if (!user) return res.status(404).json({ message: "کاربر یافت نشد" });
     res.json(user);
   } catch (err) {
@@ -152,13 +143,7 @@ exports.updateUser = async (req, res) => {
       updates.password = await bcrypt.hash(updates.password, 10);
     }
 
-    if (req.file) updates.avatar = req.file.filename;
-
-    const user = await User.findByIdAndUpdate(
-      req.user.id,
-      { $set: updates },
-      { new: true, runValidators: true }
-    ).select("-password");
+    const user = await User.findByIdAndUpdate(req.user.id, { $set: updates }, { new: true, runValidators: true }).select("-password");
 
     if (!user) return res.status(404).json({ message: "کاربر یافت نشد" });
 
@@ -185,12 +170,10 @@ exports.deleteUser = async (req, res) => {
 exports.refreshToken = async (req, res) => {
   try {
     const refreshToken = req.cookies.refreshToken;
-    if (!refreshToken)
-      return res.status(401).json({ message: "رفرش توکن یافت نشد" });
+    if (!refreshToken) return res.status(401).json({ message: "رفرش توکن یافت نشد" });
 
     jwt.verify(refreshToken, JWT_REFRESH_SECRET, async (err, decoded) => {
-      if (err)
-        return res.status(403).json({ message: "رفرش توکن نامعتبر است" });
+      if (err) return res.status(403).json({ message: "رفرش توکن نامعتبر است" });
 
       const user = await User.findById(decoded.id);
       if (!user) return res.status(404).json({ message: "کاربر یافت نشد" });
@@ -210,28 +193,20 @@ exports.logout = (req, res) => {
 };
 
 //------------------تغییر پسورد ---------------------
-
 exports.changePassword = async (req, res, mode) => {
   try {
     let userId;
     let { oldPassword, newPassword } = req.body;
 
     if (mode === "self") {
-      // تغییر پسورد توسط خود کاربر
       userId = req.user.id;
-      if (!oldPassword || !newPassword) {
-        return res
-          .status(400)
-          .json({ message: "پسورد قبلی و جدید الزامی است" });
-      }
+      if (!oldPassword || !newPassword) return res.status(400).json({ message: "پسورد قبلی و جدید الزامی است" });
 
       const user = await User.findById(userId);
       if (!user) return res.status(404).json({ message: "کاربر یافت نشد" });
 
       const isMatch = await bcrypt.compare(oldPassword, user.password);
-      if (!isMatch) {
-        return res.status(400).json({ message: "پسورد قبلی اشتباه است" });
-      }
+      if (!isMatch) return res.status(400).json({ message: "پسورد قبلی اشتباه است" });
 
       user.password = await bcrypt.hash(newPassword, 10);
       await user.save();
@@ -240,11 +215,8 @@ exports.changePassword = async (req, res, mode) => {
     }
 
     if (mode === "admin") {
-      // ریست پسورد توسط ادمین
       userId = req.params.id;
-      if (!newPassword) {
-        return res.status(400).json({ message: "پسورد جدید الزامی است" });
-      }
+      if (!newPassword) return res.status(400).json({ message: "پسورد جدید الزامی است" });
 
       const user = await User.findById(userId);
       if (!user) return res.status(404).json({ message: "کاربر یافت نشد" });
@@ -261,11 +233,49 @@ exports.changePassword = async (req, res, mode) => {
   }
 };
 
-//----------------------گرفتن همه کاربران------------------------
+//---------------------- مدیریت کاربران توسط ادمین ------------------------
+exports.createUserByAdmin = async (req, res) => {
+  try {
+    const { fname, lname, email, username, department, phone, password, role, status } = req.body;
+
+    if (!email || !username || !password) return res.status(400).json({ message: "ایمیل، نام کاربری و پسورد الزامی است" });
+
+    const existingUser = await User.findOne({ $or: [{ email: email.toLowerCase().trim() }, { username }] });
+    if (existingUser) return res.status(400).json({ message: "ایمیل یا نام کاربری قبلاً ثبت شده است" });
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = new User({
+      fname, lname,
+      email: email.toLowerCase().trim(),
+      username,
+      department,
+      phone,
+      password: hashedPassword,
+      role: role || "کاربر",
+      status: status || "فعال",
+    });
+
+    await user.save();
+
+    res.status(201).json({ message: "کاربر ایجاد شد", user: { id: user._id, fname, lname, email, username, role: user.role, status: user.status } });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
 
 exports.getAllUsers = async (req, res) => {
-    try {
-    const user = await User.find(req.user).select("-password");
+  try {
+    const users = await User.find().select("-password").populate("department", "name description");
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+exports.getUserById = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id).select("-password").populate("department", "name description");
     if (!user) return res.status(404).json({ message: "کاربر یافت نشد" });
     res.json(user);
   } catch (err) {
@@ -273,4 +283,27 @@ exports.getAllUsers = async (req, res) => {
   }
 };
 
+exports.updateUserByAdmin = async (req, res) => {
+  try {
+    const updates = req.body;
+    if (updates.password) updates.password = await bcrypt.hash(updates.password, 10);
 
+    const user = await User.findByIdAndUpdate(req.params.id, { $set: updates }, { new: true, runValidators: true }).select("-password");
+    if (!user) return res.status(404).json({ message: "کاربر یافت نشد" });
+
+    res.json({ message: "کاربر بروزرسانی شد", user });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+exports.deleteUserByAdmin = async (req, res) => {
+  try {
+    const user = await User.findByIdAndDelete(req.params.id);
+    if (!user) return res.status(404).json({ message: "کاربر یافت نشد" });
+
+    res.json({ message: "کاربر حذف شد" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};

@@ -38,9 +38,8 @@ const { adminOnly } = require("../middlewares/role.middleware");
  *               status: { type: string, enum: [active, inactive, banned] }
  *     responses:
  *       201: { description: کاربر ایجاد شد }
- *       400: { description: ایمیل یا نام کاربری تکراری است }
  */
-router.post("/", authMiddleware, adminOnly, authController.createUserByAdmin || ((req,res)=>res.status(501).json({message:"createUserByAdmin not implemented"})));
+router.post("/", authMiddleware, adminOnly, authController.createUserByAdmin);
 
 /**
  * @swagger
@@ -53,7 +52,7 @@ router.post("/", authMiddleware, adminOnly, authController.createUserByAdmin || 
  *     responses:
  *       200: { description: لیست کاربران }
  */
-router.get("/", authController.getAllUsers || ((req,res)=>res.status(501).json({message:"getAllUsers not implemented"})));
+router.get("/", authMiddleware, adminOnly, authController.getAllUsers);
 
 /**
  * @swagger
@@ -72,7 +71,7 @@ router.get("/", authController.getAllUsers || ((req,res)=>res.status(501).json({
  *       200: { description: اطلاعات کاربر }
  *       404: { description: کاربر یافت نشد }
  */
-router.get("/:id", authMiddleware, adminOnly, authController.getUserById || ((req,res)=>res.status(501).json({message:"getUserById not implemented"})));
+router.get("/:id", authMiddleware, adminOnly, authController.getUserById);
 
 /**
  * @swagger
@@ -105,7 +104,7 @@ router.get("/:id", authMiddleware, adminOnly, authController.getUserById || ((re
  *       200: { description: بروزرسانی موفقیت‌آمیز }
  *       404: { description: کاربر یافت نشد }
  */
-router.put("/:id", authMiddleware, adminOnly, authController.updateUserByAdmin || ((req,res)=>res.status(501).json({message:"updateUserByAdmin not implemented"})));
+router.put("/:id", authMiddleware, adminOnly, authController.updateUserByAdmin);
 
 /**
  * @swagger
@@ -124,7 +123,7 @@ router.put("/:id", authMiddleware, adminOnly, authController.updateUserByAdmin |
  *       200: { description: کاربر حذف شد }
  *       404: { description: کاربر یافت نشد }
  */
-router.delete("/:id", authMiddleware, adminOnly, authController.deleteUserByAdmin || ((req,res)=>res.status(501).json({message:"deleteUserByAdmin not implemented"})));
+router.delete("/:id", authMiddleware, adminOnly, authController.deleteUserByAdmin);
 
 /**
  * @swagger
@@ -151,9 +150,6 @@ router.delete("/:id", authMiddleware, adminOnly, authController.deleteUserByAdmi
  *     responses:
  *       200: { description: پسورد کاربر ریست شد }
  */
-router.put("/:id/reset-password", authMiddleware, adminOnly, (req, res) =>
-  authController.changePassword(req, res, "admin")
-);
-
+router.put("/:id/reset-password", authMiddleware, adminOnly, (req, res) => authController.changePassword(req, res, "admin"));
 
 module.exports = router;

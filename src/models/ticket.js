@@ -2,21 +2,33 @@ const mongoose = require("mongoose");
 const generateTicketNumber = require("../utils/ticketNumber");
 
 const TicketSchema = new mongoose.Schema({
-  creator: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-  category: { type: mongoose.Schema.Types.ObjectId, ref: "Category", required: true },
+  creator: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
+  category: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Category",
+    required: true,
+  },
   title: { type: String, required: true },
   ticketNumber: { type: String, required: true, unique: true },
   status: {
     type: String,
-    enum: ["open", "in_progress", "resolved", "closed"],
-    default: "open",
+    enum: ["باز", "در حال بررسی", "حل شده", "بسته"],
+    default: "باز",
   },
   priority: {
     type: String,
-    enum: ["low", "medium", "high", "urgent"],
-    default: "medium",
+    enum: ["پایین", "متوسط", "بالا", "فوری"],
+    default: "متوسط",
   },
-  assignedDepartment: { type: String, required: true },
+  assignedDepartment: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Department",
+    required: true,
+  },
   description: { type: String },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },

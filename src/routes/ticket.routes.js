@@ -35,7 +35,7 @@ const router = express.Router();
  *       403:
  *         description: دسترسی غیرمجاز
  */
-router.get("/", authMiddleware, adminOnly, getAllTickets);
+router.get("/", authMiddleware, getAllTickets);
 
 /**
  * @swagger
