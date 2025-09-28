@@ -35,7 +35,7 @@ const { adminOnly } = require("../middlewares/role.middleware");
  *               phone: { type: string }
  *               password: { type: string }
  *               role: { type: string, enum: [admin, manager, staff, user] }
- *               status: { type: string, enum: [active, inactive, banned] }
+ *               status: { type: string, enum: [فعال, غیر فعال, بن شده] }
  *     responses:
  *       201: { description: کاربر ایجاد شد }
  */
@@ -98,7 +98,7 @@ router.get("/:id", authMiddleware, adminOnly, authController.getUserById);
  *               phone: { type: string }
  *               department: { type: string }
  *               role: { type: string, enum: [admin, manager, staff, user] }
- *               status: { type: string, enum: [active, inactive, banned] }
+ *               status: { type: string, enum: [فعال, غیر فعال, بن شده] }
  *               password: { type: string }
  *     responses:
  *       200: { description: بروزرسانی موفقیت‌آمیز }

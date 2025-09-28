@@ -10,7 +10,7 @@ exports.allowRoles = (...roles) => {
 
 // فقط ادمین
 exports.adminOnly = (req, res, next) => {
-  if (!req.user || req.user.role !== "admin") {
+  if (!req.user || req.user.role !== "ادمین") {
     return res
       .status(403)
       .json({ message: "دسترسی فقط برای ادمین مجاز است" });
